@@ -146,7 +146,7 @@ Exact expected payoff per hand (row vs column, averaged over both seats) with th
 | TP | -0.080 | -0.028 | 0 | +0.137 |
 | LP | -0.471 | -0.166 | -0.137 | 0 |
 
-This gives a strict dominance order, TAG > LAG > TP > LP. No tested combination of `tau` and `alpha` produced a cycle (rock-paper-scissors).
+This gives a strict dominance order, TAG > LAG > TP > LP. None of the 135 tested combinations of `tau` and `alpha` produced a cycle (rock-paper-scissors). Reproduce with `uv run python analysis/tau_pilot.py`.
 
 ### Decision Rule
 
@@ -278,17 +278,17 @@ Only the focal agent updates.
 - **`p_copy = 0.5` at `Δ = 0` is kept.** This is the standard Fermi rule. With `BETA = 0` it turns the model into neutral drift (a voter model), where each strategy's fixation probability equals its initial share. That run is the null model.
 - **Baseline `BETA = 4` is kept.** A single encounter is only weakly biased (`p_copy` of about 0.50–0.54), but the bias adds up over the 20,000 events of a run.
 
-The copy probability for every strategy pair was computed exactly from the full distribution of `K`-hand payoffs, and the population dynamics were simulated from those probabilities (pilot: 100 runs per condition, `K = 10`). The result shows three regimes:
+The copy probability for every strategy pair was computed exactly from the full distribution of `K`-hand payoffs, and the population dynamics were simulated from those probabilities (pilot: 100 runs per condition, `K = 10`, reproducible with `uv run python analysis/beta_pilot.py --k 10 --beta 0 4 16`). The result shows three regimes:
 
 | `BETA` | Behaviour |
 |---:|---|
 | 0 | Neutral drift: fixation matches the initial shares. |
-| 4 | Selection and initial composition both matter. Balanced start: TAG fixes in 62% of runs. TAG majority: TAG fixes in 84%. LAG majority: TAG 48%, LAG 27%. TP majority: TAG 36%, TP 35%. |
-| 16+ | Selection dominates: TAG fixes in 79–99% of runs whatever the start. Initial composition no longer matters. |
+| 4 | Selection and initial composition both matter. Balanced start: TAG fixes in 59% of runs. TAG majority: TAG fixes in 82%. LAG majority: TAG 46%, LAG 30%. TP majority: TAG 39%, TP 30%. |
+| 16+ | Selection dominates: TAG fixes in 83–99% of runs whatever the start. Initial composition no longer matters. |
 
 `BETA = 4` sits in the intermediate regime, so it is the most informative baseline for the research question.
 
-With a large `BETA`, the rule approaches "copy the opponent if they won the encounter". It then selects for how *often* a strategy wins rather than how *much*. With `K = 1` and `BETA = 16`, LAG fixes in 90–100% of runs even though TAG has the higher expected payoff. The sensitivity experiments therefore include large `BETA` together with small `K`.
+With a large `BETA`, the rule approaches "copy the opponent if they won the encounter". It then selects for how *often* a strategy wins rather than how *much*. With `K = 1` and `BETA = 16`, LAG fixes in 79–100% of runs even though TAG has the higher expected payoff (`--k 1 --beta 16`). The sensitivity experiments therefore include large `BETA` together with small `K`.
 
 The same exact copy probabilities serve as a validation target: shares from the real simulation, which plays actual hands, must match the pilot within sampling error. They are not used for adaptation in the experiments.
 
@@ -444,6 +444,11 @@ tests/
 ├── test_strategies.py
 ├── test_adaptation.py
 └── test_reproducibility.py
+
+analysis/                    # exact pilot analyses behind the parameter choices
+├── exact.py                 # game-tree enumeration: payoff matrix, adoption probabilities
+├── tau_pilot.py             # issue #2: threshold choice, cycle search
+└── beta_pilot.py            # issue #3: beta choice, population dynamics
 ```
 
 ## Development
