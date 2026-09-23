@@ -86,13 +86,9 @@ Each strategy is defined by:
 
 For information state `I`:
 
-\[
-e(I)
-=
-P(win \mid I)
-+
-\frac{1}{2}P(tie \mid I)
-\]
+```math
+e(I) = P(\text{win} \mid I) + \frac{1}{2}P(\text{tie} \mid I)
+```
 
 Calculate this exactly by enumerating possible hidden cards.
 
@@ -170,21 +166,13 @@ K = 10
 
 For an encounter:
 
-\[
-\bar{u}_i
-=
-\frac{1}{K}
-\sum_{h=1}^{K}
-u_i^{(h)}
-\]
+```math
+\bar{u}_i = \frac{1}{K} \sum_{h=1}^{K} u_i^{(h)}
+```
 
-\[
-\bar{u}_j
-=
-\frac{1}{K}
-\sum_{h=1}^{K}
-u_j^{(h)}
-\]
+```math
+\bar{u}_j = \frac{1}{K} \sum_{h=1}^{K} u_j^{(h)}
+```
 
 ---
 
@@ -192,29 +180,21 @@ u_j^{(h)}
 
 Calculate the payoff difference:
 
-\[
-\Delta_{ij}
-=
-\bar{u}_j-\bar{u}_i
-\]
+```math
+\Delta_{ij} = \bar{u}_j-\bar{u}_i
+```
 
 Normalize it:
 
-\[
-d_{ij}
-=
-\frac{\Delta_{ij}}
-{2U_{\max}}
-\]
+```math
+d_{ij} = \frac{\Delta_{ij}}{2U_{\max}}
+```
 
 The probability that focal agent `i` copies comparison agent `j` is:
 
-\[
-P(i \leftarrow j)
-=
-\frac{1}
-{1+\exp(-\beta d_{ij})}
-\]
+```math
+P(i \leftarrow j) = \frac{1}{1+\exp(-\beta d_{ij})}
+```
 
 Baseline:
 
@@ -280,11 +260,9 @@ Record the population share of each strategy after every generation.
 
 For strategy `s`:
 
-\[
-p_s(g)
-=
-\frac{\text{number of agents using }s}{N}
-\]
+```math
+p_s(g) = \frac{\text{number of agents using } s}{N}
+```
 
 Record:
 
@@ -306,27 +284,23 @@ Also record:
 
 ### Switching Rate
 
-\[
-R_{\text{switch}}(g)
-=
-\frac{\text{number of strategy changes in generation }g}{N}
-\]
+```math
+R_{\text{switch}}(g) = \frac{\text{number of strategy changes in generation } g}{N}
+```
 
 ### Population Diversity
 
-\[
-H(g)
-=
--\sum_s p_s(g)\log p_s(g)
-\]
+```math
+H(g) = -\sum_s p_s(g)\log p_s(g)
+```
 
 ### Fixation
 
 Fixation occurs when:
 
-\[
+```math
 p_s(g)=1
-\]
+```
 
 for one strategy.
 
@@ -365,10 +339,10 @@ This tests sensitivity to:
 
 ---
 
-## Suggested Repository Structure
+## Repository Structure
 
 ```text
-src/
+src/dmas/
 ├── leduc/
 │   └── game.py
 ├── strategies/
@@ -391,6 +365,19 @@ tests/
 ├── test_adaptation.py
 └── test_reproducibility.py
 ```
+
+## Development
+
+Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
+
+```bash
+uv sync                  # create .venv and install dependencies
+uv run pytest            # run tests
+uv run ruff check .      # lint
+uv run ruff format .     # format
+```
+
+CI runs lint, format check and tests on every push to `main` and on pull requests.
 
 ---
 
