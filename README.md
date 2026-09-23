@@ -49,7 +49,7 @@ Leduc Poker remains a normal **1-v-1 game**. The multi-agent system is the large
 
 ## Leduc Poker
 
-Use a standard two-player Leduc Poker implementation with:
+We use OpenSpiel's `leduc_poker` (`pyspiel.load_game("leduc_poker")`, open_spiel 2.0.2) with default parameters: a two-player game with:
 
 - 6-card deck
 - 3 ranks
@@ -64,7 +64,30 @@ Agents adapt using the **actual realized results of played games**.
 
 Do not use a fixed expected-payoff matrix for adaptation.
 
-Before final experiments, verify the exact betting rules, payoff convention, and maximum possible single-hand utility `U_MAX` from the chosen Leduc implementation.
+### Game Rules
+
+Verified against OpenSpiel 2.0.2:
+
+| Rule | Value |
+|---|---|
+| Ante | 1 chip per player |
+| Bet / raise size | 2 in round 1, 4 in round 2 |
+| Raise cap | 2 per round (the first bet counts as one) |
+| First to act | player 0, in both rounds |
+| Cards | `0`–`5`, rank = `card // 2` (`0,1` = J, `2,3` = Q, `4,5` = K) |
+| Showdown | pair with the public card wins, otherwise higher rank wins, equal ranks split the pot |
+| Payoff | chips won or lost, zero-sum (`state.returns()`) |
+| `U_MAX` | 13 (`game.max_utility()`): ante 1 + 2 raises of 2 + 2 raises of 4 |
+
+Actions:
+
+| Id | Name | Meaning |
+|---:|---|---|
+| 0 | Fold | only legal when facing a bet |
+| 1 | Call | check when no bet is outstanding, otherwise call |
+| 2 | Raise | bet when no bet is outstanding, otherwise raise |
+
+Because player 0 always acts first, seats must alternate between the two agents across the `K` hands of an encounter.
 
 ---
 
