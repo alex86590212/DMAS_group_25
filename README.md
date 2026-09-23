@@ -272,6 +272,26 @@ if rng.random() < p_copy:
 
 Only the focal agent updates.
 
+### Choice of Normalisation and `BETA`
+
+- **Normalisation `d = Δ / (2 * U_MAX)` is kept.** It is fixed by the game rules, bounds `d` to `[-1, 1]` and needs no estimation. Any other constant normaliser, such as the empirical payoff standard deviation, would only rescale `BETA`.
+- **`p_copy = 0.5` at `Δ = 0` is kept.** This is the standard Fermi rule. With `BETA = 0` it turns the model into neutral drift (a voter model), where each strategy's fixation probability equals its initial share. That run is the null model.
+- **Baseline `BETA = 4` is kept.** A single encounter is only weakly biased (`p_copy` of about 0.50–0.54), but the bias adds up over the 20,000 events of a run.
+
+The copy probability for every strategy pair was computed exactly from the full distribution of `K`-hand payoffs, and the population dynamics were simulated from those probabilities (pilot: 100 runs per condition, `K = 10`). The result shows three regimes:
+
+| `BETA` | Behaviour |
+|---:|---|
+| 0 | Neutral drift: fixation matches the initial shares. |
+| 4 | Selection and initial composition both matter. Balanced start: TAG fixes in 62% of runs. TAG majority: TAG fixes in 84%. LAG majority: TAG 48%, LAG 27%. TP majority: TAG 36%, TP 35%. |
+| 16+ | Selection dominates: TAG fixes in 79–99% of runs whatever the start. Initial composition no longer matters. |
+
+`BETA = 4` sits in the intermediate regime, so it is the most informative baseline for the research question.
+
+With a large `BETA`, the rule approaches "copy the opponent if they won the encounter". It then selects for how *often* a strategy wins rather than how *much*. With `K = 1` and `BETA = 16`, LAG fixes in 90–100% of runs even though TAG has the higher expected payoff. The sensitivity experiments therefore include large `BETA` together with small `K`.
+
+The same exact copy probabilities serve as a validation target: shares from the real simulation, which plays actual hands, must match the pilot within sampling error. They are not used for adaptation in the experiments.
+
 There is:
 
 - no policy learning
@@ -385,7 +405,7 @@ After the baseline experiment works, test:
 
 ```python
 K_VALUES = [1, 10, 50]
-BETA_VALUES = [1, 4, 8]
+BETA_VALUES = [0, 1, 4, 8, 16]   # 0 = neutral-drift reference
 TAU_VALUES = [(0.65, 0.40), (0.60, 0.40), (0.65, 0.25)]   # (tight, loose)
 ALPHA_VALUES = [(0.80, 0.20), (0.70, 0.30), (0.90, 0.10)]  # (aggressive, passive)
 ```
@@ -394,6 +414,8 @@ This tests sensitivity to:
 
 - short-term poker randomness
 - strength of payoff-based selection
+
+`K_VALUES x BETA_VALUES` is run as a full grid. `TAU_VALUES` and `ALPHA_VALUES` are varied one at a time, with all other parameters at baseline.
 
 ---
 
