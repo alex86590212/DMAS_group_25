@@ -100,9 +100,9 @@ Each strategy is defined by:
 
 | Strategy | tau | alpha |
 |---|---:|---:|
-| TAG | 0.60 | 0.80 |
+| TAG | 0.65 | 0.80 |
 | LAG | 0.40 | 0.80 |
-| TP | 0.60 | 0.20 |
+| TP | 0.65 | 0.20 |
 | LP | 0.40 | 0.20 |
 
 ### Hand Strength
@@ -114,6 +114,39 @@ e(I) = P(\text{win} \mid I) + \frac{1}{2}P(\text{tie} \mid I)
 ```
 
 Calculate this exactly by enumerating possible hidden cards.
+
+Leduc has only three ranks, so `e(I)` takes only six values:
+
+| Private card | Pre-flop | Post-flop, public J | Post-flop, public Q | Post-flop, public K |
+|---|---:|---:|---:|---:|
+| J | 0.30 | 1.0 | 0.125 | 0.125 |
+| Q | 0.50 | 0.125 | 1.0 | 0.625 |
+| K | 0.70 | 0.625 | 0.625 | 1.0 |
+
+A threshold `tau` only changes behaviour when it crosses one of these values. The chosen thresholds give:
+
+| | Pre-flop continues with | Post-flop continues with |
+|---|---|---|
+| Tight (`tau = 0.65`) | K | pair |
+| Loose (`tau = 0.40`) | K, Q | pair, K-high, Q-high under a K |
+
+Rejected alternatives:
+
+- `(0.60, 0.40)`: tight and loose differ only with a Q before the flop.
+- `(0.65, 0.25)`: loose plays every hand pre-flop, and LAG vs LP becomes an exact tie, so aggression has no effect between loose strategies.
+- `tau_L <= 0.125`: loose never folds.
+- `tau_T > 0.70`: tight never continues pre-flop.
+
+Exact expected payoff per hand (row vs column, averaged over both seats) with the chosen parameters:
+
+| | TAG | LAG | TP | LP |
+|---|---:|---:|---:|---:|
+| TAG | 0 | +0.150 | +0.080 | +0.471 |
+| LAG | -0.150 | 0 | +0.028 | +0.166 |
+| TP | -0.080 | -0.028 | 0 | +0.137 |
+| LP | -0.471 | -0.166 | -0.137 | 0 |
+
+This gives a strict dominance order, TAG > LAG > TP > LP. No tested combination of `tau` and `alpha` produced a cycle (rock-paper-scissors).
 
 ### Decision Rule
 
@@ -353,6 +386,8 @@ After the baseline experiment works, test:
 ```python
 K_VALUES = [1, 10, 50]
 BETA_VALUES = [1, 4, 8]
+TAU_VALUES = [(0.65, 0.40), (0.60, 0.40), (0.65, 0.25)]   # (tight, loose)
+ALPHA_VALUES = [(0.80, 0.20), (0.70, 0.30), (0.90, 0.10)]  # (aggressive, passive)
 ```
 
 This tests sensitivity to:

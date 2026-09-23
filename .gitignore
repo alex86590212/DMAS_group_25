@@ -8,3 +8,4 @@ dist/
 build/
 results/
 .DS_Store
+*.tex
