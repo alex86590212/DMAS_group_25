@@ -102,8 +102,9 @@ def test_same_seed_same_hands():
             play_hand(recording(check_call, log, 0), recording(check_call, log, 1), rng)
         return log
 
-    assert hands(7) == hands(7)
-    assert hands(7) != hands(8)
+    first_run, second_run, other_seed = hands(7), hands(7), hands(8)
+    assert first_run == second_run
+    assert first_run != other_seed
 
 
 def test_illegal_action_raises():
