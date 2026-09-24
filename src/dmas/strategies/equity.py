@@ -1,23 +1,8 @@
 """Exact hand equity for OpenSpiel Leduc Poker."""
 
-import pyspiel
+from dmas.leduc.game import GAME, Action, rank
 
-_GAME = pyspiel.load_game("leduc_poker")
-
-# OpenSpiel Leduc action:
-# 1 = check when no bet is outstanding, otherwise call.
-_CHECK_CALL = 1
-
-# OpenSpiel card ids:
-# 0,1 = J
-# 2,3 = Q
-# 4,5 = K
 _RANKS = range(3)
-
-
-def _rank(card: int) -> int:
-    """Return the rank of an OpenSpiel Leduc card."""
-    return card // 2
 
 
 def _outcome_from_return(player_return: float) -> float:
@@ -45,11 +30,11 @@ def _exact_equity(
     total_equity = 0.0
     total_probability = 0.0
 
-    initial_state = _GAME.new_initial_state()
+    initial_state = GAME.new_initial_state()
 
     # First chance node: player 0 private card.
     for hero_card, hero_prob in initial_state.chance_outcomes():
-        if _rank(hero_card) != private_rank:
+        if rank(hero_card) != private_rank:
             continue
 
         hero_state = initial_state.clone()
@@ -61,20 +46,20 @@ def _exact_equity(
             opponent_state.apply_action(opponent_card)
 
             # Check/check through the first betting round.
-            opponent_state.apply_action(_CHECK_CALL)
-            opponent_state.apply_action(_CHECK_CALL)
+            opponent_state.apply_action(int(Action.CALL))
+            opponent_state.apply_action(int(Action.CALL))
 
             # Third chance node: public card.
             for public_card, public_prob in opponent_state.chance_outcomes():
-                if public_rank is not None and _rank(public_card) != public_rank:
+                if public_rank is not None and rank(public_card) != public_rank:
                     continue
 
                 showdown_state = opponent_state.clone()
                 showdown_state.apply_action(public_card)
 
                 # Check/check through the second betting round.
-                showdown_state.apply_action(_CHECK_CALL)
-                showdown_state.apply_action(_CHECK_CALL)
+                showdown_state.apply_action(int(Action.CALL))
+                showdown_state.apply_action(int(Action.CALL))
 
                 result = _outcome_from_return(showdown_state.returns()[0])
 
@@ -95,9 +80,12 @@ def _exact_equity(
 
 # Precompute all 12 information states once.
 EQUITY_TABLE = {
-    (private_rank, public_rank): _exact_equity(
-        private_rank,
-        public_rank,
+    (private_rank, public_rank): round(
+        _exact_equity(
+            private_rank,
+            public_rank,
+        ),
+        3,
     )
     for private_rank in _RANKS
     for public_rank in (None, *_RANKS)
