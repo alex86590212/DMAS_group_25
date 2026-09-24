@@ -11,13 +11,11 @@ from dmas.strategies.equity import EQUITY_TABLE, equity
         (0, 0, 1.0),
         (0, 1, 0.125),
         (0, 2, 0.125),
-
         # Q
         (1, None, 0.50),
         (1, 0, 0.125),
         (1, 1, 1.0),
         (1, 2, 0.625),
-
         # K
         (2, None, 0.70),
         (2, 0, 0.625),

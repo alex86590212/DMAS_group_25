@@ -66,10 +66,7 @@ def _exact_equity(
 
             # Third chance node: public card.
             for public_card, public_prob in opponent_state.chance_outcomes():
-                if (
-                    public_rank is not None
-                    and _rank(public_card) != public_rank
-                ):
+                if public_rank is not None and _rank(public_card) != public_rank:
                     continue
 
                 showdown_state = opponent_state.clone()
@@ -79,24 +76,16 @@ def _exact_equity(
                 showdown_state.apply_action(_CHECK_CALL)
                 showdown_state.apply_action(_CHECK_CALL)
 
-                result = _outcome_from_return(
-                    showdown_state.returns()[0]
-                )
+                result = _outcome_from_return(showdown_state.returns()[0])
 
-                probability = (
-                    hero_prob
-                    * opponent_prob
-                    * public_prob
-                )
+                probability = hero_prob * opponent_prob * public_prob
 
                 total_equity += probability * result
                 total_probability += probability
 
     if total_probability == 0:
         raise ValueError(
-            f"Impossible information state: "
-            f"private_rank={private_rank}, "
-            f"public_rank={public_rank}"
+            f"Impossible information state: private_rank={private_rank}, public_rank={public_rank}"
         )
 
     # We conditioned on the requested information state, so normalize
@@ -136,18 +125,11 @@ def equity(
     return EQUITY_TABLE[(private_rank, public_rank)]
 
 
-
 def main() -> None:
     """Print the precomputed equity table."""
     rank_names = {0: "J", 1: "Q", 2: "K"}
 
-    print(
-        f"{'Private':<8}"
-        f"{'Pre-flop':>10}"
-        f"{'Public J':>10}"
-        f"{'Public Q':>10}"
-        f"{'Public K':>10}"
-    )
+    print(f"{'Private':<8}{'Pre-flop':>10}{'Public J':>10}{'Public Q':>10}{'Public K':>10}")
 
     for private_rank in _RANKS:
         print(
