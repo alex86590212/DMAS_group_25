@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from dmas.simulation.runner import play_encounter
-from dmas.strategies.strategy import TAG, LAG
+from dmas.strategies.strategy import LAG, TAG
 
 
 def test_encounter_payoffs_sum_to_zero():
