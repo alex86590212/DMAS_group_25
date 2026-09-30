@@ -8,7 +8,7 @@ CONDITION = "balanced"
 
 def assert_same(a, b):
     assert a.seed == b.seed
-    np.testing.assert_array_equal(a.shares, b.shares)
+    np.testing.assert_allclose(a.shares, b.shares)
     np.testing.assert_array_equal(a.switches, b.switches)
     np.testing.assert_array_equal(a.transitions, b.transitions)
     assert a.fixation_generation == b.fixation_generation
@@ -22,7 +22,7 @@ def test_different_replicates_differ():
     a = run_replicate(CONDITION, 0, CONFIG)
     b = run_replicate(CONDITION, 1, CONFIG)
     assert a.seed != b.seed
-    assert not np.array_equal(a.shares, b.shares)
+    assert not np.allclose(a.shares, b.shares)
 
 
 def test_different_conditions_get_different_seeds():

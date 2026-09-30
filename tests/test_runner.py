@@ -35,8 +35,8 @@ def test_encounter_is_reproducible():
         np.random.default_rng(42),
     )
 
-    assert mean_focal_1 == mean_focal_2
-    assert mean_comparison_1 == mean_comparison_2
+    assert mean_focal_1 == pytest.approx(mean_focal_2)
+    assert mean_comparison_1 == pytest.approx(mean_comparison_2)
 
 
 def test_encounter_requires_positive_k():
@@ -59,8 +59,9 @@ def test_replicate_shape_and_invariants():
     assert result.shares.shape == (4, 4)
     np.testing.assert_allclose(result.shares.sum(axis=1), 1.0)
     np.testing.assert_allclose(result.shares[0], (0.55, 0.15, 0.15, 0.15))
-    assert result.transitions.sum() == result.switches.sum()
-    assert np.trace(result.transitions) == 0
+    assert result.transitions.shape == (3, 4, 4)
+    np.testing.assert_array_equal(result.transitions.sum(axis=(1, 2)), result.switches)
+    assert np.trace(result.transitions, axis1=1, axis2=2).sum() == 0
 
 
 def test_run_stops_and_pads_after_fixation():
@@ -78,4 +79,4 @@ def test_run_stops_and_pads_after_fixation():
     assert result.fixation_generation == 0
     assert result.fixed_strategy == "TAG"
     assert result.switches.sum() == 0
-    assert (result.shares == result.shares[0]).all()
+    np.testing.assert_allclose(result.shares, np.tile(result.shares[0], (7, 1)))

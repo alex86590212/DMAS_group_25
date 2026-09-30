@@ -113,7 +113,7 @@ class ReplicateResult:
     # shares[g] is the composition after generation g (row 0 is the initial state).
     shares: np.ndarray  # (generations + 1, n_strategies)
     switches: np.ndarray  # (generations,) strategy changes per generation
-    transitions: np.ndarray  # (n_strategies, n_strategies) counts, [old, new]
+    transitions: np.ndarray  # (generations, n_strategies, n_strategies) counts, [g, old, new]
     fixed_strategy: str | None
     fixation_generation: int | None
 
@@ -121,6 +121,10 @@ class ReplicateResult:
 def replicate_seed(condition: str, replicate: int, base_seed: int = 0) -> np.random.SeedSequence:
     """Seed derived from (condition, replicate); independent of ordering and worker count."""
     return np.random.SeedSequence([base_seed, zlib.crc32(condition.encode()), replicate])
+
+
+def _is_fixed(row: np.ndarray) -> bool:
+    return bool(np.isclose(row.max(), 1.0))
 
 
 def _shares_row(population: Population) -> np.ndarray:
@@ -138,10 +142,10 @@ def run_replicate(condition: str, replicate: int, config: SimulationConfig) -> R
 
     shares = np.empty((config.generations + 1, len(strategies)))
     switches = np.zeros(config.generations, dtype=int)
-    transitions = np.zeros((len(strategies), len(strategies)), dtype=int)
+    transitions = np.zeros((config.generations, len(strategies), len(strategies)), dtype=int)
     shares[0] = _shares_row(population)
 
-    fixation_generation = 0 if shares[0].max() == 1.0 else None
+    fixation_generation = 0 if _is_fixed(shares[0]) else None
     for g in range(1, config.generations + 1):
         if fixation_generation is not None and config.stop_at_fixation:
             shares[g:] = shares[g - 1]
@@ -158,12 +162,12 @@ def run_replicate(condition: str, replicate: int, config: SimulationConfig) -> R
             )
             if result.switched:
                 switches[g - 1] += 1
-                transitions[index[result.old], index[result.new]] += 1
+                transitions[g - 1, index[result.old], index[result.new]] += 1
         shares[g] = _shares_row(population)
-        if fixation_generation is None and shares[g].max() == 1.0:
+        if fixation_generation is None and _is_fixed(shares[g]):
             fixation_generation = g
 
-    fixed = strategies[int(shares[-1].argmax())] if shares[-1].max() == 1.0 else None
+    fixed = strategies[int(shares[-1].argmax())] if _is_fixed(shares[-1]) else None
     return ReplicateResult(
         condition=condition,
         replicate=replicate,

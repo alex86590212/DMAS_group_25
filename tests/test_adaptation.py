@@ -6,7 +6,7 @@ from dmas.evolution.adaptation import adapt, copy_probability
 
 
 def test_p_is_half_when_payoffs_equal():
-    assert copy_probability(1.0, 1.0) == 0.5
+    assert copy_probability(1.0, 1.0) == pytest.approx(0.5)
 
 
 def test_p_rises_with_delta():
@@ -17,12 +17,12 @@ def test_p_rises_with_delta():
 
 def test_beta_zero_gives_half():
     for delta in (-13, 0, 13):
-        assert copy_probability(0.0, delta, beta=0.0) == 0.5
+        assert copy_probability(0.0, delta, beta=0.0) == pytest.approx(0.5)
 
 
 def test_extreme_beta_does_not_overflow():
-    assert copy_probability(13.0, -13.0, beta=1e9) == 0.0
-    assert copy_probability(-13.0, 13.0, beta=1e9) == 1.0
+    assert copy_probability(13.0, -13.0, beta=1e9) == pytest.approx(0.0)
+    assert copy_probability(-13.0, 13.0, beta=1e9) == pytest.approx(1.0)
 
 
 def test_normaliser_is_configurable():

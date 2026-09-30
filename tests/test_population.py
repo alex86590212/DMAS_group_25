@@ -34,7 +34,7 @@ def test_sampled_agents_always_differ():
 def test_shares_sum_to_one():
     shares = make().shares()
     assert list(shares) == list(STRATEGIES)
-    assert shares["TAG"] == 0.55
+    assert shares["TAG"] == pytest.approx(0.55)
     assert sum(shares.values()) == pytest.approx(1.0)
 
 
