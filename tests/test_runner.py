@@ -48,3 +48,34 @@ def test_encounter_requires_positive_k():
 
     with pytest.raises(ValueError):
         play_encounter(TAG, LAG, -1, rng)
+
+
+def test_replicate_shape_and_invariants():
+    from dmas.simulation.runner import SimulationConfig, run_replicate
+
+    config = SimulationConfig(n=20, generations=3, replicates=1, k=2)
+    result = run_replicate("tag_majority", 0, config)
+
+    assert result.shares.shape == (4, 4)
+    np.testing.assert_allclose(result.shares.sum(axis=1), 1.0)
+    np.testing.assert_allclose(result.shares[0], (0.55, 0.15, 0.15, 0.15))
+    assert result.transitions.sum() == result.switches.sum()
+    assert np.trace(result.transitions) == 0
+
+
+def test_run_stops_and_pads_after_fixation():
+    from dmas.simulation.runner import SimulationConfig, run_replicate
+
+    config = SimulationConfig(
+        n=20,
+        generations=6,
+        replicates=1,
+        k=2,
+        initial_conditions={"all_tag": (1.0, 0.0, 0.0, 0.0)},
+    )
+    result = run_replicate("all_tag", 0, config)
+
+    assert result.fixation_generation == 0
+    assert result.fixed_strategy == "TAG"
+    assert result.switches.sum() == 0
+    assert (result.shares == result.shares[0]).all()
