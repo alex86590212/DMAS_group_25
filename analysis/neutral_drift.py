@@ -19,7 +19,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-
 STRATEGIES = ("TAG", "LAG", "TP", "LP")
 
 CONDITIONS = {
