@@ -70,17 +70,13 @@ def oscillation(df: pd.DataFrame) -> pd.Series:
 
     for column in shares.columns:
         differences = shares[column].diff().to_numpy()
-        differences = differences[
-            np.isfinite(differences) & ~np.isclose(differences, 0.0)
-        ]
+        differences = differences[np.isfinite(differences) & ~np.isclose(differences, 0.0)]
 
         if len(differences) < 2:
             result[column.removeprefix("share_")] = 0
             continue
 
         signs = np.sign(differences)
-        result[column.removeprefix("share_")] = int(
-            np.sum(signs[1:] != signs[:-1])
-        )
+        result[column.removeprefix("share_")] = int(np.sum(signs[1:] != signs[:-1]))
 
     return pd.Series(result, name="oscillations")
