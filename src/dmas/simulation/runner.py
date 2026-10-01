@@ -2,6 +2,7 @@ import zlib
 from collections.abc import Mapping
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass, field
+from tqdm import tqdm
 
 import numpy as np
 
@@ -186,11 +187,38 @@ def _run_one(args: tuple[str, int, SimulationConfig]) -> ReplicateResult:
 
 
 def run_condition(
-    condition: str, config: SimulationConfig, workers: int | None = None
+    condition: str,
+    config: SimulationConfig,
+    workers: int | None = None,
 ) -> list[ReplicateResult]:
     """Run all replicates of one condition; results are ordered by replicate index."""
-    jobs = [(condition, r, config) for r in range(config.replicates)]
+    jobs = [
+        (condition, r, config)
+        for r in range(config.replicates)
+    ]
+
     if workers == 1:
-        return [_run_one(job) for job in jobs]
+        return [
+            _run_one(job)
+            for job in tqdm(
+                jobs,
+                total=len(jobs),
+                desc=condition,
+                unit="replicate",
+            )
+        ]
+
     with ProcessPoolExecutor(max_workers=workers) as pool:
-        return list(pool.map(_run_one, jobs))
+        results = pool.map(
+            _run_one,
+            jobs,
+        )
+
+        return list(
+            tqdm(
+                results,
+                total=len(jobs),
+                desc=condition,
+                unit="replicate",
+            )
+        )
