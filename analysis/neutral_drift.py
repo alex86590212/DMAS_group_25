@@ -124,9 +124,7 @@ def main() -> None:
 
     all_rows = []
 
-    for condition_index, (condition, composition) in enumerate(
-        CONDITIONS.items()
-    ):
+    for condition_index, (condition, composition) in enumerate(CONDITIONS.items()):
         rows = run_condition(
             condition=condition,
             composition=composition,
@@ -148,18 +146,14 @@ def main() -> None:
     summary_rows = []
 
     for condition, composition in CONDITIONS.items():
-        condition_df = replicate_df[
-            replicate_df["condition"] == condition
-        ]
+        condition_df = replicate_df[replicate_df["condition"] == condition]
 
         for strategy, initial_share in zip(
             STRATEGIES,
             composition,
             strict=True,
         ):
-            observed = (
-                condition_df["fixed_strategy"] == strategy
-            ).mean()
+            observed = (condition_df["fixed_strategy"] == strategy).mean()
 
             summary_rows.append(
                 {
@@ -190,18 +184,14 @@ def main() -> None:
         "stopping_rule": "run until one strategy reaches fixation",
     }
 
-    (RESULTS_DIR / "metadata.json").write_text(
-        json.dumps(metadata, indent=2)
-    )
+    (RESULTS_DIR / "metadata.json").write_text(json.dumps(metadata, indent=2))
 
     print("\nNeutral drift (beta=0)")
     print(f"N={args.n}, replicates={args.reps}")
     print("Fixation frequencies vs. initial shares:\n")
 
     for condition in CONDITIONS:
-        condition_summary = summary_df[
-            summary_df["condition"] == condition
-        ]
+        condition_summary = summary_df[summary_df["condition"] == condition]
 
         print(condition)
 
