@@ -83,3 +83,31 @@ def play_hand(
 
     u0, u1 = state.returns()
     return u0, u1
+
+
+def play_encounter(
+    focal: Policy,
+    comparison: Policy,
+    k: int,
+    rng: np.random.Generator,
+) -> tuple[float, float]:
+    """Seats alternate between hands because seat 0 always acts first. The seat of the first hand
+    is drawn randomly.
+    """
+    if k < 1:
+        raise ValueError(f"k must be at least 1, got {k}")
+
+    focal_seat = int(rng.integers(2))
+    focal_total = 0.0
+    comparison_total = 0.0
+
+    for _ in range(k):
+        if focal_seat == 0:
+            u_focal, u_comparison = play_hand(focal, comparison, rng)
+        else:
+            u_comparison, u_focal = play_hand(comparison, focal, rng)
+        focal_total += u_focal
+        comparison_total += u_comparison
+        focal_seat = 1 - focal_seat
+
+    return focal_total / k, comparison_total / k
